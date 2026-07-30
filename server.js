@@ -18,6 +18,8 @@ const directory = path.dirname(fileURLToPath(import.meta.url));
 const contentDirectory = path.join(directory, 'data');
 const contentFile = path.join(contentDirectory, 'content.json');
 
+app.set('trust proxy', 1);
+
 if (!adminEnabled) {
   console.warn(
     'Yönetici girişi devre dışı: ADMIN_USERNAME, ADMIN_PASSWORD ve SESSION_SECRET ortam değişkenlerini tanımlayın.'
