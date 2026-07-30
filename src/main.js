@@ -88,6 +88,10 @@ document.getElementById('contactForm')?.addEventListener('submit', function hand
   window.setTimeout(() => toast?.classList.remove('show'), 4000);
 });
 
-if (window.location.pathname.replace(/\/+$/, '') === '/admin') {
+const isAdminPage =
+  window.location.pathname.replace(/\/+$/, '') === '/admin' ||
+  new URLSearchParams(window.location.search).get('admin') === '1';
+
+if (isAdminPage) {
   import('./admin.js').then(({ initializeAdmin }) => initializeAdmin(editableContent));
 }
