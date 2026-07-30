@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnındaGetir Nakliye — 7/24 Nakliyat Hizmeti</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; }
+        ::selection { background: #22c55e; color: white; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
+        @keyframes truck-move { 0% { transform: translateX(-100%); } 100% { transform: translateX(calc(100vw + 100%)); } }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+        .delay-300 { animation-delay: 0.3s; }
+        .hero-gradient { background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 40%, #f0fdf4 100%); }
+        .service-card:hover { transform: translateY(-8px); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); }
+        .service-card { transition: all 0.4s cubic-bezier(0.4,0,0.2,1); }
+        .truck-animation { animation: truck-move 12s linear infinite; }
+        .nav-link { position: relative; }
+        .nav-link::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: #22c55e; transition: width 0.3s ease; }
+        .nav-link:hover::after { width: 100%; }
+        .stat-counter { background: linear-gradient(135deg, #22c55e, #16a34a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .toast { transform: translateY(100px); opacity: 0; transition: all 0.4s ease; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        body.splash-active { overflow: hidden; }
+        .splash-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            gap: 18px;
+            background: #ffffff;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        .splash-screen.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .splash-logo {
+            font-family: 'Geist', sans-serif;
+            font-size: clamp(2.2rem, 7vw, 3.8rem);
+            font-weight: 700;
+            letter-spacing: -0.06em;
+            animation: splash-logo-in 0.5s ease both;
+        }
+        .splash-truck {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #16a34a;
+            animation: splash-truck-in 0.8s ease 0.15s both;
+        }
+        @keyframes splash-logo-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes splash-truck-in {
+            from { opacity: 0; transform: translateX(-28px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .whatsapp-button {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 60;
+            box-shadow: 0 16px 35px rgba(22, 163, 74, 0.3);
+        }
+        .whatsapp-button:hover { transform: scale(1.04); }
+        @media (max-width: 640px) {
+            .whatsapp-button {
+                right: 16px;
+                bottom: 18px;
+            }
+            .whatsapp-button .whatsapp-label { display: none; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .splash-logo, .splash-truck { animation: none; }
+        }
+    </style>
+</head>
+<body class="splash-active bg-white text-slate-900 font-inter overflow-x-hidden">
+
+    <div id="splash-screen" class="splash-screen" role="status" aria-label="AnındaGetir yükleniyor">
+        <div class="splash-logo">Anında<span class="text-brand-600">Getir</span></div>
+        <div class="splash-truck" aria-hidden="true">
+            <i data-lucide="truck" class="w-9 h-9"></i>
+        </div>
+    </div>
+
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/60 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="#" class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-brand-500 rounded-lg flex items-center justify-center">
+                    <i data-lucide="truck" class="w-6 h-6 text-white"></i>
+                </div>
+                <span class="font-geist font-bold text-xl tracking-tight">Anında<span class="text-brand-600">Getir</span></span>
+            </a>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#hizmetler" class="nav-link text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Hizmetler</a>
+                <a href="#nasil" class="nav-link text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Nasıl Çalışır</a>
+                <a href="#hakkimizda" class="nav-link text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Hakkımızda</a>
+                <a href="#galeri" class="nav-link text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Galerimiz</a>
+                <a href="#iletisim" class="nav-link text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">İletişim</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="tel:+905391007406" class="hidden lg:flex items-center gap-2 text-sm font-medium text-brand-700 hover:text-brand-600 transition-colors">
+                    <i data-lucide="phone" class="w-4 h-4"></i> Hemen Ara
+                </a>
+                <a href="#iletisim" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold px-5 py-2.5 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-brand-600/25">Ücretsiz Teklif</a>
+                <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-600"><i data-lucide="menu" class="w-5 h-5"></i></button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 px-6 py-4">
+            <div class="flex flex-col gap-3">
+                <a href="#hizmetler" class="text-sm font-medium text-slate-600 py-2">Hizmetler</a>
+                <a href="#nasil" class="text-sm font-medium text-slate-600 py-2">Nasıl Çalışır</a>
+                <a href="#hakkimizda" class="text-sm font-medium text-slate-600 py-2">Hakkımızda</a>
+                <a href="#galeri" class="text-sm font-medium text-slate-600 py-2">Galerimiz</a>
+                <a href="#iletisim" class="text-sm font-medium text-slate-600 py-2">İletişim</a>
+                <a href="tel:+905391007406" class="flex items-center gap-2 text-sm font-medium text-brand-700 py-2"><i data-lucide="phone" class="w-4 h-4"></i> Hemen Ara</a>
+            </div>
+        </div>
+    </nav>
+
+    <a
+        href="https://wa.me/905338806106"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="WhatsApp üzerinden 0533 880 6106 numarasına yazın"
+        class="whatsapp-button flex items-center gap-3 rounded-full bg-[#25D366] px-4 py-3 text-white transition-all duration-300 hover:bg-[#20bd5a] focus:outline-none focus:ring-4 focus:ring-green-300"
+    >
+        <i data-lucide="message-circle" class="h-7 w-7" aria-hidden="true"></i>
+        <span class="whatsapp-label pr-1 text-sm font-semibold">WhatsApp</span>
+    </a>
+
+    <section class="hero-gradient min-h-screen flex items-center relative overflow-hidden pt-16">
+        <div class="absolute top-20 right-0 w-96 h-96 bg-brand-200/30 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-brand-100/40 rounded-full blur-[100px]"></div>
+        <div class="absolute bottom-24 left-0 right-0 overflow-hidden opacity-10">
+            <div class="h-1 bg-brand-500 w-full"></div>
+            <div class="truck-animation mt-2"><i data-lucide="truck" class="w-12 h-12 text-brand-600"></i></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-6 py-20 lg:py-0 w-full">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="animate-fade-in-up">
+                    <div class="inline-flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-full px-4 py-1.5 mb-6">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+                        </span>
+                        <span class="text-xs font-medium text-brand-700">7/24 Hizmetinizdeyiz</span>
+                    </div>
+                    <h1 class="text-4xl sm:text-5xl lg:text-7xl font-semibold tracking-tighter leading-[1.1] mb-6">Taşınma<br><span class="text-brand-600">Derdi Bitiyor</span></h1>
+                    <p class="text-lg text-slate-500 leading-relaxed max-w-lg mb-8">Ev, ofis, depo nakliyatı ve parça yük taşımacılığında Kıbrısın güvenilir adresi. Uygun fiyat, hızlı teslimat, 7/24 hizmet.</p>
+                    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-4">
+                        <a href="#iletisim" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-brand-600/25 flex items-center justify-center gap-2 group">Ücretsiz Teklif Alın <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i></a>
+                        <a href="tel:+905391007406" class="border-2 border-slate-200 hover:border-brand-300 text-slate-700 font-semibold px-6 py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 hover:bg-brand-50"><i data-lucide="phone" class="w-4 h-4 text-brand-600"></i> 0539 100 7406</a>
+                        <a href="tel:+905338806106" class="border-2 border-slate-200 hover:border-brand-300 text-slate-700 font-semibold px-6 py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 hover:bg-brand-50"><i data-lucide="phone" class="w-4 h-4 text-brand-600"></i> 0533 880 6106</a>
+                    </div>
+                    <div class="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-slate-200">
+                        <div><div class="text-3xl font-bold stat-counter">5000+</div><div class="text-xs text-slate-500 mt-1">Mutlu Müşteri</div></div>
+                        <div><div class="text-3xl font-bold stat-counter">10+</div><div class="text-xs text-slate-500 mt-1">Yıllık Deneyim</div></div>
+                        <div><div class="text-3xl font-bold stat-counter">7/24</div><div class="text-xs text-slate-500 mt-1">Kesintisiz Hizmet</div></div>
+                    </div>
+                </div>
+                <div class="relative animate-fade-in-up delay-300">
+                    <div class="relative rounded-2xl overflow-hidden shadow-2xl">
+                        <img src="assets/images/anindagetir-hero.jpeg" alt="AnındaGetir güvenli nakliye hizmeti" class="w-full h-[450px] lg:h-[550px] object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-brand-900/40 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-md rounded-xl p-4 flex items-center gap-4">
+                            <div class="w-12 h-12 bg-brand-500 rounded-lg flex items-center justify-center flex-shrink-0"><i data-lucide="shield-check" class="w-6 h-6 text-white"></i></div>
+                            <div><div class="text-sm font-semibold text-slate-900">Sigortalı Taşıma</div><div class="text-xs text-slate-500">Eşyalarınız güvence altında</div></div>
+                        </div>
+                    </div>
+                    <div class="absolute -top-4 -right-4 bg-brand-600 text-white rounded-xl px-4 py-3 shadow-lg animate-float">
+                        <div class="text-xs font-medium">7/24</div>
+                        <div class="text-sm font-bold">Ulaşabilirsiniz</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="hizmetler" class="py-24 bg-slate-50/50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-full px-4 py-1.5 mb-4">
+                    <i data-lucide="package" class="w-3.5 h-3.5 text-brand-600"></i>
+                    <span class="text-xs font-medium text-brand-700">Hizmetlerimiz</span>
+                </div>
+                <h2 class="text-3xl lg:text-5xl font-semibold tracking-tighter mb-4">Her İhtiyaca Uygun<br><span class="text-brand-600">Nakliyat Çözümleri</span></h2>
+                <p class="text-slate-500 max-w-xl mx-auto">Koli taşımaktan ev nakliyatına, her büyüklükte taşıma ihtiyacınızda yanınızdayız.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="service-card bg-white rounded-2xl p-8 border border-slate-200/60 group cursor-pointer">
+                    <div class="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-500 transition-colors duration-300"><i data-lucide="home" class="w-7 h-7 text-brand-600 group-hover:text-white transition-colors duration-300"></i></div>
+                    <h3 class="text-xl font-semibold mb-3 tracking-tight">Ev Nakliyatı</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-4">Eşyalarınızı özenle paketleyip güvenle yeni adresinize taşıyoruz. Söküm, montaj ve yerleştirme dahil.</p>
+                    <a href="https://wa.me/905338806106?text=Merhaba%2C%20Ev%20Nakliyat%C4%B1%20hakk%C4%B1nda%20detayl%C4%B1%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-brand-600 text-sm font-medium group-hover:gap-3 transition-all">Detaylı Bilgi <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+                </div>
+                <div class="service-card bg-white rounded-2xl p-8 border border-slate-200/60 group cursor-pointer">
+                    <div class="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-500 transition-colors duration-300"><i data-lucide="building-2" class="w-7 h-7 text-brand-600 group-hover:text-white transition-colors duration-300"></i></div>
+                    <h3 class="text-xl font-semibold mb-3 tracking-tight">Ofis Nakliyatı</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-4">İş yerinizi minimum iş kaybıyla taşıyoruz. Hafta sonu ve gece taşıma seçenekleri mevcuttur.</p>
+                    <a href="https://wa.me/905338806106?text=Merhaba%2C%20Ofis%20Nakliyat%C4%B1%20hakk%C4%B1nda%20detayl%C4%B1%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-brand-600 text-sm font-medium group-hover:gap-3 transition-all">Detaylı Bilgi <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+                </div>
+                <div class="service-card bg-white rounded-2xl p-8 border border-slate-200/60 group cursor-pointer">
+                    <div class="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-500 transition-colors duration-300"><i data-lucide="warehouse" class="w-7 h-7 text-brand-600 group-hover:text-white transition-colors duration-300"></i></div>
+                    <h3 class="text-xl font-semibold mb-3 tracking-tight">Depo Nakliyatı</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-4">Büyük hacimli depo taşımalarında profesyonel ekip ve ekipmanla hizmet veriyoruz.</p>
+                    <a href="https://wa.me/905338806106?text=Merhaba%2C%20Depo%20Nakliyat%C4%B1%20hakk%C4%B1nda%20detayl%C4%B1%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-brand-600 text-sm font-medium group-hover:gap-3 transition-all">Detaylı Bilgi <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+                </div>
+                <div class="service-card bg-white rounded-2xl p-8 border border-slate-200/60 group cursor-pointer">
+                    <div class="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-500 transition-colors duration-300"><i data-lucide="package" class="w-7 h-7 text-brand-600 group-hover:text-white transition-colors duration-300"></i></div>
+                    <h3 class="text-xl font-semibold mb-3 tracking-tight">Koli ve Çuval Taşıma</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-4">Az miktarda eşya veya koli taşımacılığında hızlı ve ekonomik çözümler sunuyoruz.</p>
+                    <a href="https://wa.me/905338806106?text=Merhaba%2C%20Koli%20ve%20%C3%87uval%20Ta%C5%9F%C4%B1ma%20hakk%C4%B1nda%20detayl%C4%B1%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-brand-600 text-sm font-medium group-hover:gap-3 transition-all">Detaylı Bilgi <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+                </div>
+                <div class="service-card bg-white rounded-2xl p-8 border border-slate-200/60 group cursor-pointer">
+                    <div class="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-500 transition-colors duration-300"><i data-lucide="box" class="w-7 h-7 text-brand-600 group-hover:text-white transition-colors duration-300"></i></div>
+                    <h3 class="text-xl font-semibold mb-3 tracking-tight">Parça Yük Taşımacılığı</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-4">Tek parça veya karma yükleriniz için uygun fiyatlı ve güvenli taşıma seçenekleri.</p>
+                    <a href="https://wa.me/905338806106?text=Merhaba%2C%20Par%C3%A7a%20Y%C3%BCk%20Ta%C5%9F%C4%B1mac%C4%B1l%C4%B1%C4%9F%C4%B1%20hakk%C4%B1nda%20detayl%C4%B1%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-brand-600 text-sm font-medium group-hover:gap-3 transition-all">Detaylı Bilgi <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+                </div>
+                <div class="service-card bg-white rounded-2xl p-8 border border-slate-200/60 group cursor-pointer">
+                    <div class="w-14 h-14 bg-brand-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-brand-500 transition-colors duration-300"><i data-lucide="clock" class="w-7 h-7 text-brand-600 group-hover:text-white transition-colors duration-300"></i></div>
+                    <h3 class="text-xl font-semibold mb-3 tracking-tight">7/24 Acil Taşıma</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-4">Acil taşıma ihtiyaçlarınızda gece gündüz demeden hızlıca yanınızdayız. Anında getir!</p>
+                    <a href="https://wa.me/905338806106?text=Merhaba%2C%207%2F24%20Acil%20Ta%C5%9F%C4%B1ma%20hakk%C4%B1nda%20detayl%C4%B1%20bilgi%20almak%20istiyorum." target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-brand-600 text-sm font-medium group-hover:gap-3 transition-all">Detaylı Bilgi <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="nasil" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-full px-4 py-1.5 mb-4">
+                    <i data-lucide="list-checks" class="w-3.5 h-3.5 text-brand-600"></i>
+                    <span class="text-xs font-medium text-brand-700">Nasıl Çalışır?</span>
+                </div>
+                <h2 class="text-3xl lg:text-5xl font-semibold tracking-tighter mb-4">3 Adımda<br><span class="text-brand-600">Taşınma Rahatlığı</span></h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 relative">
+                <div class="hidden md:block absolute top-16 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-brand-200 via-brand-400 to-brand-200"></div>
+                <div class="text-center relative">
+                    <div class="w-16 h-16 bg-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold relative z-10 shadow-lg shadow-brand-600/30">1</div>
+                    <h3 class="text-xl font-semibold mb-3 tracking-tight">Bize Ulaşın</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">Telefon, WhatsApp veya form aracılığıyla taşıma ihtiyacınızı bildirin.</p>
+                </div>
+                <div class="text-center relative">
+                    <div class="w-16 h-16 bg-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold relative z-10 shadow-lg shadow-brand-600/30">2</div>
+                    <h3 class="text-xl font-semibold mb-3 tracking-tight">Ücretsiz Keşif ve Teklif</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">Eşyalarınızı yerinde inceler, şeffaf fiyat teklifimizi sunarız.</p>
+                </div>
+                <div class="text-center relative">
+                    <div class="w-16 h-16 bg-brand-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white text-2xl font-bold relative z-10 shadow-lg shadow-brand-600/30">3</div>
+                    <h3 class="text-xl font-semibold mb-3 tracking-tight">Güvenle Taşıyoruz</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">Profesyonel ekibimiz eşyalarınızı özenle paketleyip güvenle taşır.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="hakkimizda" class="py-24 bg-brand-900 text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-brand-700/30 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-brand-600/20 rounded-full blur-[100px]"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-6">
+                        <i data-lucide="award" class="w-3.5 h-3.5 text-brand-300"></i>
+                        <span class="text-xs font-medium text-brand-200">Neden Biz?</span>
+                    </div>
+                    <h2 class="text-3xl lg:text-5xl font-semibold tracking-tighter mb-6 leading-[1.1]">Kıbrıs'ın<br><span class="text-brand-400">Güvenilir Nakliyatçısı</span></h2>
+                    <p class="text-white/70 text-lg leading-relaxed mb-8">Yılların deneyimi ve binlerce mutlu müşteriyle KKTC'nin en güvenilir nakliye firmalarından biri olmaktan gurur duyuyoruz.</p>
+                    <div class="space-y-5">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 bg-brand-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"><i data-lucide="shield-check" class="w-5 h-5 text-brand-400"></i></div>
+                            <div><div class="font-semibold mb-1">Sigortalı Taşıma</div><div class="text-white/60 text-sm">Tüm eşyalarınız taşıma süresince sigorta güvencesi altındadır.</div></div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 bg-brand-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"><i data-lucide="users" class="w-5 h-5 text-brand-400"></i></div>
+                            <div><div class="font-semibold mb-1">Deneyimli Ekip</div><div class="text-white/60 text-sm">Profesyonel ve özenli çalışan kadromuzla hizmet veriyoruz.</div></div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 bg-brand-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"><i data-lucide="badge-check" class="w-5 h-5 text-brand-400"></i></div>
+                            <div><div class="font-semibold mb-1">Şeffaf Fiyatlandırma</div><div class="text-white/60 text-sm">Sürpriz ek ücret yok, en baştan net fiyat veriyoruz.</div></div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 bg-brand-500/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"><i data-lucide="clock" class="w-5 h-5 text-brand-400"></i></div>
+                            <div><div class="font-semibold mb-1">Zamanında Teslimat</div><div class="text-white/60 text-sm">Söz verdiğimiz saatte teslimat, gecikme yok.</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <img src="https://picsum.photos/seed/moving-team-work/600/500.jpg" alt="AnındaGetir Ekibi" class="w-full h-[400px] lg:h-[500px] object-cover rounded-2xl shadow-2xl">
+                    <div class="absolute -bottom-6 -left-6 bg-white text-slate-900 rounded-xl p-5 shadow-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="flex -space-x-2">
+                                <div class="w-8 h-8 bg-brand-100 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-brand-700">M</div>
+                                <div class="w-8 h-8 bg-brand-200 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-brand-700">A</div>
+                                <div class="w-8 h-8 bg-brand-300 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-brand-700">K</div>
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold">5000+ Mutlu Müşteri</div>
+                                <div class="flex items-center gap-1">
+                                    <i data-lucide="star" class="w-3 h-3 fill-yellow-400 text-yellow-400"></i>
+                                    <i data-lucide="star" class="w-3 h-3 fill-yellow-400 text-yellow-400"></i>
+                                    <i data-lucide="star" class="w-3 h-3 fill-yellow-400 text-yellow-400"></i>
+                                    <i data-lucide="star" class="w-3 h-3 fill-yellow-400 text-yellow-400"></i>
+                                    <i data-lucide="star" class="w-3 h-3 fill-yellow-400 text-yellow-400"></i>
+                                    <span class="text-xs text-slate-500 ml-1">4.9/5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-full px-4 py-1.5 mb-4">
+                    <i data-lucide="message-circle" class="w-3.5 h-3.5 text-brand-600"></i>
+                    <span class="text-xs font-medium text-brand-700">Müşteri Yorumları</span>
+                </div>
+                <h2 class="text-3xl lg:text-5xl font-semibold tracking-tighter mb-4">Müşterilerimiz<br><span class="text-brand-600">Ne Diyor?</span></h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100">
+                    <div class="flex items-center gap-1 mb-4"><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i></div>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-6">"3 odalı evimizi bir günde taşıdılar. Eşyalarımıza hiçbir zarar gelmedi, çok profesyonel bir ekip. Kesinlikle tavsiye ederim!"</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center text-sm font-bold text-brand-700">AY</div>
+                        <div><div class="text-sm font-semibold">Ayşe Yılmaz</div><div class="text-xs text-slate-500">Ev Nakliyatı</div></div>
+                    </div>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100">
+                    <div class="flex items-center gap-1 mb-4"><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i></div>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-6">"Ofisimizi hafta sonu taşıdılar, Pazartesi hiç aksama olmadan işe başladık. Fiyatları da çok uygun, teşekkürler AnındaGetir!"</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center text-sm font-bold text-brand-700">MK</div>
+                        <div><div class="text-sm font-semibold">Mehmet Kaya</div><div class="text-xs text-slate-500">Ofis Nakliyatı</div></div>
+                    </div>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-8 border border-slate-100">
+                    <div class="flex items-center gap-1 mb-4"><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i><i data-lucide="star" class="w-4 h-4 fill-yellow-400 text-yellow-400"></i></div>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-6">"Acil birkaç koli taşımam gerekiyordu, aynı gün geldiler. 7/24 hizmet gerçekten büyük avantaj. Herkese öneriyorum!"</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center text-sm font-bold text-brand-700">SÖ</div>
+                        <div><div class="text-sm font-semibold">Selin Özkan</div><div class="text-xs text-slate-500">Parça Yük</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="galeri" class="py-24 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl lg:text-5xl font-semibold tracking-tighter mb-4">Galerimiz</h2>
+                <p class="text-slate-500 max-w-xl mx-auto">Çalışmalarımızdan en güncel kareleri Instagram hesabımızdan inceleyin.</p>
+            </div>
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
+                <a href="https://www.instagram.com/anindagetir/reel/DaX7mc_MIDW/" target="_blank" rel="noopener noreferrer" aria-label="Instagram gönderisini aç" class="group relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl bg-slate-200">
+                    <img src="assets/gallery/instagram-1.jpg" alt="AnındaGetir nakliyat çalışması" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <span class="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition-all duration-300 group-hover:bg-black/35 group-hover:opacity-100"><i data-lucide="instagram" class="w-8 h-8"></i></span>
+                </a>
+                <a href="https://www.instagram.com/anindagetir/reel/DafXvOos_AY/" target="_blank" rel="noopener noreferrer" aria-label="Instagram gönderisini aç" class="group relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl bg-slate-200">
+                    <img src="assets/gallery/instagram-2.jpg" alt="AnındaGetir nakliyat çalışması" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <span class="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition-all duration-300 group-hover:bg-black/35 group-hover:opacity-100"><i data-lucide="instagram" class="w-8 h-8"></i></span>
+                </a>
+                <a href="https://www.instagram.com/anindagetir/p/DNsXQ-52OHm/" target="_blank" rel="noopener noreferrer" aria-label="Instagram gönderisini aç" class="group relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl bg-slate-200">
+                    <img src="assets/gallery/instagram-3.jpg" alt="AnındaGetir nakliyat çalışması" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <span class="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition-all duration-300 group-hover:bg-black/35 group-hover:opacity-100"><i data-lucide="instagram" class="w-8 h-8"></i></span>
+                </a>
+                <a href="https://www.instagram.com/anindagetir/p/Da2OozmMuSL/" target="_blank" rel="noopener noreferrer" aria-label="Instagram gönderisini aç" class="group relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl bg-slate-200">
+                    <img src="assets/gallery/instagram-4.jpg" alt="AnındaGetir nakliyat çalışması" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <span class="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition-all duration-300 group-hover:bg-black/35 group-hover:opacity-100"><i data-lucide="instagram" class="w-8 h-8"></i></span>
+                </a>
+                <a href="https://www.instagram.com/anindagetir/reel/DaIhMZqs5gt/" target="_blank" rel="noopener noreferrer" aria-label="Instagram gönderisini aç" class="group relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl bg-slate-200">
+                    <img src="assets/gallery/instagram-5.jpg" alt="AnındaGetir nakliyat çalışması" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <span class="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition-all duration-300 group-hover:bg-black/35 group-hover:opacity-100"><i data-lucide="instagram" class="w-8 h-8"></i></span>
+                </a>
+                <a href="https://www.instagram.com/anindagetir/p/DaA5p70s7qI/" target="_blank" rel="noopener noreferrer" aria-label="Instagram gönderisini aç" class="group relative aspect-square overflow-hidden rounded-xl sm:rounded-2xl bg-slate-200">
+                    <img src="assets/gallery/instagram-6.jpg" alt="AnındaGetir nakliyat çalışması" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <span class="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition-all duration-300 group-hover:bg-black/35 group-hover:opacity-100"><i data-lucide="instagram" class="w-8 h-8"></i></span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="iletisim" class="py-24 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-12">
+                <div>
+                    <div class="inline-flex items-center gap-2 bg-brand-50 border border-brand-200 rounded-full px-4 py-1.5 mb-6">
+                        <i data-lucide="phone-call" class="w-3.5 h-3.5 text-brand-600"></i>
+                        <span class="text-xs font-medium text-brand-700">İletişim</span>
+                    </div>
+                    <h2 class="text-3xl lg:text-5xl font-semibold tracking-tighter mb-4">Hemen <span class="text-brand-600">Ulaşın</span></h2>
+                    <p class="text-slate-500 text-lg leading-relaxed mb-8">Ücretsiz keşif ve fiyat teklifi için bize ulaşın. 7/24 hizmetinizdeyiz!</p>
+                    <div class="space-y-6 mb-10">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="map-pin" class="w-5 h-5 text-brand-600"></i></div>
+                            <div><div class="font-semibold text-sm mb-1">Adres</div><div class="text-slate-500 text-sm">Gönyeli Yenikapı Sokak Dış Kapı No:9<br>Lefkoşa, Kuzey Kıbrıs</div></div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="phone" class="w-5 h-5 text-brand-600"></i></div>
+                            <div>
+                                <div class="font-semibold text-sm mb-1">Telefon</div>
+                                <div class="flex flex-col text-slate-500 text-sm">
+                                    <a href="tel:+905391007406" class="hover:text-brand-600">0539 100 7406</a>
+                                    <a href="tel:+905338806106" class="hover:text-brand-600">0533 880 6106</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center flex-shrink-0"><i data-lucide="clock" class="w-5 h-5 text-brand-600"></i></div>
+                            <div><div class="font-semibold text-sm mb-1">Çalışma Saatleri</div><div class="text-slate-500 text-sm">7 gün 24 saat kesintisiz hizmet</div></div>
+                        </div>
+                    </div>
+                    <div class="rounded-xl overflow-hidden border border-slate-200 h-48">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3254.5!2d33.31!3d35.19!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzXCsDExJzI0LjAiTiAzM8KwMTgnMzYuMCJF!5e0!3m2!1str!2s!4v1" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-8 lg:p-10 border border-slate-200/60 shadow-lg">
+                    <h3 class="text-xl font-semibold tracking-tight mb-2">Ücretsiz Teklif Formu</h3>
+                    <p class="text-slate-500 text-sm mb-8">Formu doldurun, en kısa sürede dönüş yapalım.</p>
+                    <form id="contactForm" class="space-y-5">
+                        <div class="grid sm:grid-cols-2 gap-5">
+                            <div><label class="text-sm font-medium text-slate-700 mb-1.5 block">Ad Soyad</label><input type="text" required placeholder="Adınız Soyadınız" class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"></div>
+                            <div><label class="text-sm font-medium text-slate-700 mb-1.5 block">Telefon</label><input type="tel" required placeholder="05XX XXX XXXX" class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"></div>
+                        </div>
+                        <div><label class="text-sm font-medium text-slate-700 mb-1.5 block">Hizmet Türü</label>
+                            <select required class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all bg-white">
+                                <option value="">Seçiniz</option><option>Ev Nakliyatı</option><option>Ofis Nakliyatı</option><option>Depo Nakliyatı</option><option>Koli/Çuval Taşıma</option><option>Parça Yük</option><option>Acil Taşıma</option>
+                            </select>
+                        </div>
+                        <div><label class="text-sm font-medium text-slate-700 mb-1.5 block">Nereden</label><input type="text" placeholder="Mevcut adres" class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"></div>
+                        <div><label class="text-sm font-medium text-slate-700 mb-1.5 block">Nereye</label><input type="text" placeholder="Hedef adres" class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all"></div>
+                        <div><label class="text-sm font-medium text-slate-700 mb-1.5 block">Mesajınız</label><textarea rows="3" placeholder="Taşıma detaylarınızı belirtin..." class="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all resize-none"></textarea></div>
+                        <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-4 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-brand-600/25 flex items-center justify-center gap-2">Teklif İste <i data-lucide="send" class="w-4 h-4"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 bg-brand-600 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 text-center relative z-10">
+            <h2 class="text-3xl lg:text-4xl font-semibold tracking-tighter text-white mb-4">Taşınma Zamanı mı Geldi?</h2>
+            <p class="text-white/80 text-lg mb-8 max-w-xl mx-auto">Hemen arayın, ücretsiz keşif ve fiyat teklifimizi alın. 7/24 ulaşabilirsiniz!</p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="tel:+905391007406" class="bg-white text-brand-700 font-semibold px-8 py-4 rounded-xl hover:bg-brand-50 transition-all duration-300 flex items-center gap-2 shadow-lg"><i data-lucide="phone" class="w-5 h-5"></i> 0539 100 7406</a>
+                <a href="tel:+905338806106" class="bg-white text-brand-700 font-semibold px-8 py-4 rounded-xl hover:bg-brand-50 transition-all duration-300 flex items-center gap-2 shadow-lg"><i data-lucide="phone" class="w-5 h-5"></i> 0533 880 6106</a>
+                <a href="#iletisim" class="border-2 border-white/40 text-white font-semibold px-8 py-4 rounded-xl hover:bg-white/10 transition-all duration-300 flex items-center gap-2"><i data-lucide="message-circle" class="w-5 h-5"></i> WhatsApp'tan Yazın</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-slate-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-10 mb-12">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-brand-500 rounded-lg flex items-center justify-center"><i data-lucide="truck" class="w-6 h-6 text-white"></i></div>
+                        <span class="font-geist font-bold text-xl">Anında<span class="text-brand-400">Getir</span></span>
+                    </div>
+                    <p class="text-white/50 text-sm leading-relaxed max-w-sm mb-4">Lefkoşa merkezli, 7/24 kesintisiz nakliyat hizmeti sunan güvenilir adresiniz.</p>
+                    <div class="flex items-center gap-3">
+                        <a href="#" class="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-brand-600 transition-colors"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+                        <a href="#" class="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-brand-600 transition-colors"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+                        <a href="#" class="w-9 h-9 bg-white/10 rounded-lg flex items-center justify-center hover:bg-brand-600 transition-colors"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-sm mb-4">Hizmetler</h4>
+                    <ul class="space-y-2.5 text-white/50 text-sm">
+                        <li><a href="#" class="hover:text-brand-400 transition-colors">Ev Nakliyatı</a></li>
+                        <li><a href="#" class="hover:text-brand-400 transition-colors">Ofis Nakliyatı</a></li>
+                        <li><a href="#" class="hover:text-brand-400 transition-colors">Depo Nakliyatı</a></li>
+                        <li><a href="#" class="hover:text-brand-400 transition-colors">Koli/Çuval Taşıma</a></li>
+                        <li><a href="#" class="hover:text-brand-400 transition-colors">Parça Yük</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-sm mb-4">İletişim</h4>
+                    <ul class="space-y-2.5 text-white/50 text-sm">
+                        <li>Gönyeli Yenikapı Sokak</li>
+                        <li>Dış Kapı No:9 Lefkoşa</li>
+                        <li class="text-brand-400">+90 533 880 1234</li>
+                        <li>7/24 Hizmet</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="text-white/40 text-xs">© 2025 AnındaGetir Nakliye. Tüm hakları saklıdır.</div>
+                <div class="flex items-center gap-6 text-white/40 text-xs">
+                    <a href="#" class="hover:text-white transition-colors">Gizlilik Politikası</a>
+                    <a href="#" class="hover:text-white transition-colors">Kullanım Koşulları</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div id="toast" class="toast fixed bottom-6 right-6 bg-brand-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50 flex items-center gap-3">
+        <i data-lucide="check-circle" class="w-5 h-5"></i>
+        <span class="text-sm font-medium">Mesajınız başarıyla gönderildi!</span>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
