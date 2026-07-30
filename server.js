@@ -2,6 +2,7 @@ import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import express from 'express';
 import session from 'express-session';
+import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,18 +10,21 @@ const app = express();
 const port = Number(process.env.PORT || 3000);
 const adminUsername = process.env.ADMIN_USERNAME;
 const adminPassword = process.env.ADMIN_PASSWORD;
-
-if (!adminUsername || !adminPassword || !process.env.SESSION_SECRET) {
-  throw new Error('ADMIN_USERNAME, ADMIN_PASSWORD ve SESSION_SECRET .env dosyasında tanımlanmalıdır.');
-}
-
-const passwordHash = bcrypt.hashSync(adminPassword, 12);
+const adminEnabled = Boolean(adminUsername && adminPassword && process.env.SESSION_SECRET);
+const sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+const passwordHash = adminEnabled ? bcrypt.hashSync(adminPassword, 12) : null;
 const directory = path.dirname(fileURLToPath(import.meta.url));
+
+if (!adminEnabled) {
+  console.warn(
+    'Yönetici girişi devre dışı: ADMIN_USERNAME, ADMIN_PASSWORD ve SESSION_SECRET ortam değişkenlerini tanımlayın.'
+  );
+}
 
 app.use(express.json({ limit: '1mb' }));
 app.use(session({
   name: 'anindagetir.sid',
-  secret: process.env.SESSION_SECRET,
+  secret: sessionSecret,
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -37,6 +41,10 @@ app.get('/api/auth/me', (request, response) => {
 });
 
 app.post('/api/auth/login', async (request, response) => {
+  if (!adminEnabled) {
+    return response.status(503).json({ error: 'Yönetici girişi henüz yapılandırılmadı.' });
+  }
+
   const { username, password } = request.body || {};
   const validUser = typeof username === 'string' && username === adminUsername;
   const validPassword = typeof password === 'string' && await bcrypt.compare(password, passwordHash);
@@ -64,6 +72,6 @@ app.get('/{*path}', (_request, response) => {
   response.sendFile(path.join(directory, 'dist', 'index.html'));
 });
 
-app.listen(port, '127.0.0.1', () => {
-  console.log(`AnındaGetir sunucusu http://127.0.0.1:${port} adresinde çalışıyor.`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`AnındaGetir sunucusu 0.0.0.0:${port} adresinde çalışıyor.`);
 });
