@@ -87,10 +87,21 @@ window.addEventListener('scroll', () => {
 
 document.getElementById('contactForm')?.addEventListener('submit', function handleSubmit(event) {
   event.preventDefault();
-  const toast = document.getElementById('toast');
-  toast?.classList.add('show');
-  this.reset();
-  window.setTimeout(() => toast?.classList.remove('show'), 4000);
+  const formData = new FormData(this);
+  const getValue = (field) => String(formData.get(field) || '').trim();
+  const lines = [
+    'Merhaba, ücretsiz fiyat teklifi almak istiyorum.',
+    '',
+    `Ad Soyad: ${getValue('name')}`,
+    `Telefon: ${getValue('phone')}`,
+    `Hizmet Türü: ${getValue('service')}`,
+    `Nereden: ${getValue('from') || 'Belirtilmedi'}`,
+    `Nereye: ${getValue('to') || 'Belirtilmedi'}`,
+    `Detaylar: ${getValue('message') || 'Belirtilmedi'}`
+  ];
+
+  const whatsappUrl = `https://wa.me/905338806106?text=${encodeURIComponent(lines.join('\n'))}`;
+  window.location.href = whatsappUrl;
 });
 
 const isAdminPage =
