@@ -29,7 +29,8 @@ const sections = [
   { id: 'reviews', label: 'Müşteri Yorumları' },
   { id: 'gallery', label: 'Galeri' },
   { id: 'contact', label: 'İletişim' },
-  { id: 'footer', label: 'Alt Bilgi' }
+  { id: 'footer', label: 'Alt Bilgi' },
+  { id: 'seo', label: 'SEO Ayarları' }
 ];
 
 function renderLogin(context, message = '') {
@@ -115,7 +116,7 @@ function node(tag, className, content) {
   return element;
 }
 
-function renderDashboard({ registry, state }, username) {
+function renderDashboard({ registry, state, seo }, username) {
   document.title = 'AnındaGetir Yönetim Paneli';
   const grouped = Object.fromEntries(sections.slice(1).map((section) => [section.id, []]));
 
@@ -164,6 +165,29 @@ function renderDashboard({ registry, state }, username) {
   sections.slice(1).forEach((section) => {
     const target = document.getElementById(`fields-${section.id}`);
     const items = grouped[section.id];
+
+    if (section.id === 'seo') {
+      const seoFields = [
+        { key: 'seo-title', label: 'Google Başlığı', help: 'Önerilen uzunluk: 50–60 karakter', multiline: false },
+        { key: 'seo-description', label: 'Google Açıklaması', help: 'Önerilen uzunluk: 140–160 karakter', multiline: true },
+        { key: 'seo-keywords', label: 'Anahtar Kelimeler', help: 'Kelimeleri virgülle ayırın', multiline: true },
+        { key: 'seo-og-title', label: 'Sosyal Medya Başlığı', help: 'WhatsApp ve sosyal medya paylaşımlarında kullanılır', multiline: false },
+        { key: 'seo-og-description', label: 'Sosyal Medya Açıklaması', help: 'Paylaşım bağlantısının açıklaması', multiline: true }
+      ];
+      const holder = node('div', 'list');
+      seoFields.forEach((field) => {
+        const card = node('div', 'card', `<div class="card-head"><strong>${field.label}</strong><span class="key">${field.help}</span></div>`);
+        const input = node(field.multiline ? 'textarea' : 'input');
+        if (!field.multiline) input.type = 'text';
+        input.value = state[field.key] ?? seo[field.key] ?? '';
+        input.addEventListener('input', () => setState(field.key, input.value));
+        card.appendChild(input);
+        holder.appendChild(card);
+      });
+      target.appendChild(holder);
+      return;
+    }
+
     const types = {
       text: items.filter(({ key }) => key.startsWith('text-')),
       link: items.filter(({ key }) => key.startsWith('link-')),

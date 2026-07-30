@@ -40,6 +40,32 @@ export async function initializeEditableContent() {
   const state = await loadSharedState();
   const registry = new Map();
   const root = document.body;
+  const seo = {
+    'seo-title': state['seo-title'] || document.title,
+    'seo-description': state['seo-description'] || document.querySelector('meta[name="description"]')?.content || '',
+    'seo-keywords': state['seo-keywords'] || document.querySelector('meta[name="keywords"]')?.content || '',
+    'seo-og-title': state['seo-og-title'] || document.querySelector('meta[property="og:title"]')?.content || '',
+    'seo-og-description': state['seo-og-description'] || document.querySelector('meta[property="og:description"]')?.content || ''
+  };
+
+  document.title = seo['seo-title'];
+  document.querySelector('meta[name="description"]')?.setAttribute('content', seo['seo-description']);
+  document.querySelector('meta[name="keywords"]')?.setAttribute('content', seo['seo-keywords']);
+  document.querySelector('meta[property="og:title"]')?.setAttribute('content', seo['seo-og-title']);
+  document.querySelector('meta[property="og:description"]')?.setAttribute('content', seo['seo-og-description']);
+  document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', seo['seo-og-title']);
+  document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', seo['seo-og-description']);
+
+  const schema = document.getElementById('local-business-schema');
+  if (schema) {
+    try {
+      const schemaData = JSON.parse(schema.textContent);
+      schemaData.description = seo['seo-description'];
+      schema.textContent = JSON.stringify(schemaData);
+    } catch {
+      // Geçersiz şema, sayfanın geri kalanının yüklenmesini engellememelidir.
+    }
+  }
   let textIndex = 0;
   let imageIndex = 0;
   let linkIndex = 0;
@@ -104,5 +130,5 @@ export async function initializeEditableContent() {
     registry.set(key, option);
   });
 
-  return { registry, state };
+  return { registry, state, seo };
 }

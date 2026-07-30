@@ -123,6 +123,14 @@ const serveApp = (_request, response) => {
   response.sendFile(path.join(directory, 'dist', 'index.html'));
 };
 
+app.use((request, response, next) => {
+  const isAdminRequest =
+    request.path.replace(/\/+$/, '') === '/admin' ||
+    request.query.admin === '1';
+  if (isAdminRequest) response.set('X-Robots-Tag', 'noindex, nofollow');
+  next();
+});
+
 app.get(['/admin', '/admin/'], serveApp);
 app.use(express.static(path.join(directory, 'dist')));
 app.get('/{*path}', serveApp);
