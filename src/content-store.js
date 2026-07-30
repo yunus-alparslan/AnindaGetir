@@ -8,16 +8,36 @@ function loadState() {
   }
 }
 
-export function saveState(state) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+async function loadSharedState() {
+  try {
+    const response = await fetch('/api/content');
+    if (!response.ok) throw new Error();
+    return await response.json();
+  } catch {
+    return loadState();
+  }
 }
 
-export function clearState() {
+export async function saveState(state) {
+  const response = await fetch('/api/content', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(state)
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || 'İçerik kaydedilemedi.');
   localStorage.removeItem(STORAGE_KEY);
 }
 
-export function initializeEditableContent() {
-  const state = loadState();
+export async function clearState() {
+  const response = await fetch('/api/content', { method: 'DELETE' });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || 'İçerik sıfırlanamadı.');
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+export async function initializeEditableContent() {
+  const state = await loadSharedState();
   const registry = new Map();
   const root = document.body;
   let textIndex = 0;

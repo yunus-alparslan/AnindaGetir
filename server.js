@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import express from 'express';
 import session from 'express-session';
 import crypto from 'node:crypto';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -14,6 +15,8 @@ const adminEnabled = Boolean(adminUsername && adminPassword && process.env.SESSI
 const sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
 const passwordHash = adminEnabled ? bcrypt.hashSync(adminPassword, 12) : null;
 const directory = path.dirname(fileURLToPath(import.meta.url));
+const contentDirectory = path.join(directory, 'data');
+const contentFile = path.join(contentDirectory, 'content.json');
 
 if (!adminEnabled) {
   console.warn(
@@ -21,7 +24,7 @@ if (!adminEnabled) {
   );
 }
 
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '10mb' }));
 app.use(session({
   name: 'anindagetir.sid',
   secret: sessionSecret,
@@ -65,6 +68,55 @@ app.post('/api/auth/logout', (request, response) => {
     response.clearCookie('anindagetir.sid');
     response.json({ authenticated: false });
   });
+});
+
+async function readContent() {
+  try {
+    return JSON.parse(await fs.readFile(contentFile, 'utf8'));
+  } catch (error) {
+    if (error.code === 'ENOENT') return {};
+    throw error;
+  }
+}
+
+function requireAdmin(request, response, next) {
+  if (!request.session.admin) {
+    return response.status(401).json({ error: 'Bu işlem için yönetici girişi gereklidir.' });
+  }
+  next();
+}
+
+app.get('/api/content', async (_request, response) => {
+  try {
+    response.json(await readContent());
+  } catch {
+    response.status(500).json({ error: 'Site içeriği okunamadı.' });
+  }
+});
+
+app.put('/api/content', requireAdmin, async (request, response) => {
+  if (!request.body || typeof request.body !== 'object' || Array.isArray(request.body)) {
+    return response.status(400).json({ error: 'Geçersiz içerik verisi.' });
+  }
+
+  try {
+    await fs.mkdir(contentDirectory, { recursive: true });
+    const temporaryFile = `${contentFile}.${process.pid}.tmp`;
+    await fs.writeFile(temporaryFile, JSON.stringify(request.body, null, 2), 'utf8');
+    await fs.rename(temporaryFile, contentFile);
+    response.json({ saved: true });
+  } catch {
+    response.status(500).json({ error: 'Site içeriği kaydedilemedi.' });
+  }
+});
+
+app.delete('/api/content', requireAdmin, async (_request, response) => {
+  try {
+    await fs.rm(contentFile, { force: true });
+    response.json({ cleared: true });
+  } catch {
+    response.status(500).json({ error: 'Site içeriği sıfırlanamadı.' });
+  }
 });
 
 const serveApp = (_request, response) => {

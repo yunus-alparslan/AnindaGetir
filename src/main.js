@@ -10,12 +10,14 @@ import {
   Clock,
   createIcons,
   Facebook,
+  Forklift,
   Home,
   Instagram,
   ListChecks,
   MapPin,
   Menu,
   MessageCircle,
+  MoveVertical,
   Package,
   Phone,
   PhoneCall,
@@ -27,7 +29,8 @@ import {
   Warehouse
 } from 'lucide';
 
-const editableContent = initializeEditableContent();
+async function initializeSite() {
+const editableContent = await initializeEditableContent();
 
 createIcons({
   icons: {
@@ -39,12 +42,14 @@ createIcons({
     CheckCircle,
     Clock,
     Facebook,
+    Forklift,
     Home,
     Instagram,
     ListChecks,
     MapPin,
     Menu,
     MessageCircle,
+    MoveVertical,
     Package,
     Phone,
     PhoneCall,
@@ -95,3 +100,6 @@ const isAdminPage =
 if (isAdminPage) {
   import('./admin.js').then(({ initializeAdmin }) => initializeAdmin(editableContent));
 }
+}
+
+initializeSite();

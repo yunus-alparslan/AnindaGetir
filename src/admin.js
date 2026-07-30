@@ -86,12 +86,26 @@ function renderLogin(context, message = '') {
   });
 }
 
-function classify(element, siteSections) {
+function classify(element) {
   if (element.closest('nav')) return 'header';
   if (element.closest('footer')) return 'footer';
   const section = element.closest('section');
-  const index = siteSections.indexOf(section);
-  return ['hero', 'services', 'process', 'about', 'reviews', 'gallery', 'contact', 'contact'][index] || 'hero';
+  if (!section) return 'hero';
+
+  const sectionsById = {
+    anasayfa: 'hero',
+    hizmetler: 'services',
+    nasil: 'process',
+    hakkimizda: 'about',
+    yorumlar: 'reviews',
+    galeri: 'gallery',
+    iletisim: 'contact',
+    teklif: 'contact'
+  };
+
+  if (sectionsById[section.id]) return sectionsById[section.id];
+  if (section.classList.contains('hero-gradient')) return 'hero';
+  return 'contact';
 }
 
 function node(tag, className, content) {
@@ -103,11 +117,10 @@ function node(tag, className, content) {
 
 function renderDashboard({ registry, state }, username) {
   document.title = 'AnındaGetir Yönetim Paneli';
-  const siteSections = [...document.querySelectorAll('section')];
   const grouped = Object.fromEntries(sections.slice(1).map((section) => [section.id, []]));
 
   [...registry.entries()].forEach(([key, element]) => {
-    grouped[classify(element, siteSections)].push({ key, element });
+    grouped[classify(element)].push({ key, element });
   });
 
   document.head.querySelectorAll('style').forEach((item) => item.remove());
@@ -233,21 +246,25 @@ function renderDashboard({ registry, state }, username) {
     await fetch('/api/auth/logout', { method: 'POST' });
     window.location.reload();
   });
-  document.getElementById('save').addEventListener('click', () => {
+  document.getElementById('save').addEventListener('click', async () => {
     try {
-      saveState(state);
+      await saveState(state);
       document.getElementById('preview').src = `/?refresh=${Date.now()}`;
-      showToast('Değişiklikler kaydedildi.');
-    } catch {
-      showToast('Görsel dosyası çok büyük.');
+      showToast('Değişiklikler kaydedildi ve yayına alındı.');
+    } catch (error) {
+      showToast(error.message || 'Değişiklikler kaydedilemedi.');
     }
   });
 
   const reset = node('button', 'btn btn-red', 'Tüm Değişiklikleri Sıfırla');
-  reset.addEventListener('click', () => {
+  reset.addEventListener('click', async () => {
     if (!window.confirm('Kaydedilen tüm değişiklikler silinsin mi?')) return;
-    clearState();
-    window.location.reload();
+    try {
+      await clearState();
+      window.location.reload();
+    } catch (error) {
+      showToast(error.message || 'İçerik sıfırlanamadı.');
+    }
   });
   document.getElementById('fields-footer').appendChild(reset);
 }
