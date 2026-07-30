@@ -67,10 +67,13 @@ app.post('/api/auth/logout', (request, response) => {
   });
 });
 
-app.use(express.static(path.join(directory, 'dist')));
-app.get('/{*path}', (_request, response) => {
+const serveApp = (_request, response) => {
   response.sendFile(path.join(directory, 'dist', 'index.html'));
-});
+};
+
+app.get(['/admin', '/admin/'], serveApp);
+app.use(express.static(path.join(directory, 'dist')));
+app.get('/{*path}', serveApp);
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`AnındaGetir sunucusu 0.0.0.0:${port} adresinde çalışıyor.`);
